@@ -1,0 +1,29 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+scalar Time
+
+type OverviewNote {
+  id: Int!
+  overviewText: String!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+input NewNote {
+  text: String!
+}
+
+input NewUser {
+  username: String!
+  password: String!
+}
+
+type Query {
+  notes: [OverviewNote!]!
+  note: OverviewNote!
+}
+
+type Mutation {
+  createNote(newNote: NewNote!): OverviewNote!
+}
