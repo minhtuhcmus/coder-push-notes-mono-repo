@@ -4,6 +4,7 @@ import "time"
 
 type Note struct {
 	ID        int       `json:"ID"`
+	Title     string    `json:"title"`
 	Text      string    `json:"text"`
 	Active    bool      `json:"active"`
 	CreatedAt time.Time `json:"createdAt"`

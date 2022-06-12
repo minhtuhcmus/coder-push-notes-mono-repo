@@ -7,7 +7,8 @@ import (
 )
 
 type NewNote struct {
-	Text string `json:"text"`
+	Title string `json:"title"`
+	Text  string `json:"text"`
 }
 
 type NewUser struct {

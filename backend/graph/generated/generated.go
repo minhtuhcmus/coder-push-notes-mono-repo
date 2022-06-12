@@ -222,6 +222,7 @@ type OverviewNote {
 }
 
 input NewNote {
+  title: String!
   text: String!
 }
 
@@ -2574,6 +2575,14 @@ func (ec *executionContext) unmarshalInputNewNote(ctx context.Context, obj inter
 
 	for k, v := range asMap {
 		switch k {
+		case "title":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
+			it.Title, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
 		case "text":
 			var err error
 
