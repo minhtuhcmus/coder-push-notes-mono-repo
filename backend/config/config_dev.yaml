@@ -26,7 +26,3 @@ cors:
   allowed_headers:
     - Authorization
     - Content-Type
-cache:
-  address: "localhost:6379"
-  password: ""
-  db: 0

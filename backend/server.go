@@ -1,29 +1,66 @@
 package main
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"github.com/minhtuhcmus/coder-push-notes-mono-repo/backend/config"
+	"github.com/minhtuhcmus/coder-push-notes-mono-repo/backend/database/datastore"
+	"github.com/minhtuhcmus/coder-push-notes-mono-repo/backend/domain/registry"
+	"net"
 	"net/http"
 	"os"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/minhtuhcmus/coder-push-notes-mono-repo/backend/graph"
-	"github.com/minhtuhcmus/coder-push-notes-mono-repo/backend/graph/generated"
+	"os/signal"
+	"syscall"
 )
 
 const defaultPort = "8080"
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = defaultPort
+	err := config.Setup("config/config_dev.yaml")
+	if err != nil {
+		panic(fmt.Errorf("error getting config %v", err))
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	err = datastore.SetupDB()
+	if err != nil {
+		panic(fmt.Errorf("error connecting to db %v", err))
+	}
+	listener, errChan := runHTTPServer()
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	ctx, cancel := context.WithCancel(context.Background())
+	go func(errChan chan error) {
+		errCh := errChan
+		select {
+		case <-sigCh:
+			_ = listener.Close()
+		case _ = <-errCh:
+			_ = listener.Close()
+		}
+		cancel()
+	}(errChan)
+	<-ctx.Done()
+}
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+func runHTTPServer() (listener net.Listener, ch chan error) {
+	router, err := registry.InitHTTPServer(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
+	conf := config.GetConfig()
+
+	addr := fmt.Sprintf(":%s", conf.Server.ServerPort)
+	listener, err = net.Listen("tcp", addr)
+	if err != nil {
+		panic(err)
+	}
+
+	ch = make(chan error)
+	go func() {
+		ch <- http.Serve(listener, router)
+	}()
+
+	return listener, ch
 }
