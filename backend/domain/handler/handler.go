@@ -47,6 +47,7 @@ func ErrorPresenter() graphql.ErrorPresenterFunc {
 func NewHTTPServer(
 	middleware middlewares.Middleware,
 	authService services.AuthService,
+	noteService services.NoteService,
 ) http.Handler {
 	conf := config.GetConfig()
 
@@ -62,6 +63,7 @@ func NewHTTPServer(
 			generated.NewExecutableSchema(
 				graph.New(
 					&authService,
+					&noteService,
 				)))
 
 		srv.AddTransport(&transport.Websocket{

@@ -21,6 +21,8 @@ func InitHTTPServer(ctx context.Context) (http.Handler, error) {
 	middleware := middlewares.NewMiddleware()
 	userRepository := repositories.NewUserRepository()
 	authService := services.NewAuthService(userRepository)
-	httpHandler := handler.NewHTTPServer(middleware, authService)
+	noteRepository := repositories.NewNoteRepository()
+	noteService := services.NewNoteService(noteRepository)
+	httpHandler := handler.NewHTTPServer(middleware, authService, noteService)
 	return httpHandler, nil
 }

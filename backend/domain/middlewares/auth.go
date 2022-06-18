@@ -3,8 +3,11 @@ package middlewares
 import (
 	"context"
 	"fmt"
+	"github.com/minhtuhcmus/coder-push-notes-mono-repo/backend/database/datastore"
 	"github.com/minhtuhcmus/coder-push-notes-mono-repo/backend/utils"
 	"net/http"
+	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -23,12 +26,31 @@ func (m middleware) WithAuth() func(handler http.Handler) http.Handler {
 
 			authClaims, err := utils.JwtValidate(auth)
 			if err != nil {
-				http.Error(w, fmt.Sprintf("Invalid token %v", err), http.StatusForbidden)
+				http.Error(w, fmt.Sprintf("Invalid token %v", err), http.StatusBadRequest)
 				return
 			}
 
 			if authClaims.StandardClaims.ExpiresAt < time.Now().Unix() {
+				redisClient := datastore.GetCache()
+				savedAccessToken := redisClient.Get(context.Background(), strconv.Itoa(authClaims.UserID))
+				if savedAccessToken == nil || !reflect.DeepEqual(auth, datastore.GetCache()) {
+					http.Error(w, fmt.Sprintln("Token has expired. Please sign in again"), http.StatusBadRequest)
+					return
+				} else {
+					accessToken, err := utils.GenTokenPair(authClaims.UserID)
+					if err != nil {
+						http.Error(w, fmt.Sprintf("Cannot regen access token %v", err), http.StatusBadRequest)
+						return
+					}
 
+					http.SetCookie(w, &http.Cookie{
+						Domain: "http://localhost:8080",
+						Name:   "access_token",
+						Value:  accessToken,
+						Secure: true,
+						MaxAge: 300,
+					})
+				}
 			}
 
 			ctx := context.WithValue(r.Context(), "auth", authClaims)

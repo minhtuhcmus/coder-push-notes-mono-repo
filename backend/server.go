@@ -13,10 +13,17 @@ import (
 	"syscall"
 )
 
-const defaultPort = "8080"
+const DEFAULT_CONFIG_PATH = "config_dev.yaml"
 
 func main() {
-	err := config.Setup("config/config_dev.yaml")
+	var configPath string
+
+	configPath = os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = DEFAULT_CONFIG_PATH
+	}
+
+	err := config.Setup(fmt.Sprintf("config/%s", DEFAULT_CONFIG_PATH))
 	if err != nil {
 		panic(fmt.Errorf("error getting config %v", err))
 	}
@@ -25,6 +32,9 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("error connecting to db %v", err))
 	}
+
+	datastore.SetupCache()
+
 	listener, errChan := runHTTPServer()
 
 	sigCh := make(chan os.Signal, 1)

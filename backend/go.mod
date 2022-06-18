@@ -5,8 +5,10 @@ go 1.18
 require (
 	github.com/99designs/gqlgen v0.17.9
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/spf13/viper v1.12.0
 	github.com/vektah/gqlparser/v2 v2.4.4
+	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 	gorm.io/driver/mysql v1.3.4
 	gorm.io/gorm v1.23.4
 )
@@ -19,7 +21,6 @@ require (
 	github.com/go-chi/chi/v5 v5.0.7 // indirect
 	github.com/go-chi/cors v1.2.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/subcommands v1.0.1 // indirect
 	github.com/google/wire v0.5.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect

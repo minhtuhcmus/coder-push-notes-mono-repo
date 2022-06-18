@@ -10,17 +10,15 @@ import (
 )
 
 type claims struct {
-	UserID      int      `json:"userID"`
-	Permissions []string `json:"permissions"`
+	UserID int `json:"userID"`
 	jwt.StandardClaims
 }
 
-var salt = []byte("n4aban40a_very_secret_key")
+var salt = []byte("coderpush_very_secret_key")
 
-func JwtGenerate(userID int, permissions []string) (string, error) {
+func JwtGenerate(userID int) (string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, &claims{
-		UserID:      userID,
-		Permissions: permissions,
+		UserID: userID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
 			IssuedAt:  time.Now().Unix(),
@@ -54,8 +52,8 @@ func JwtValidate(token string) (*claims, error) {
 	return &auth, nil
 }
 
-func GenTokenPair(userID int, permissions []string) (string, error) {
-	accessToken, err := JwtGenerate(userID, permissions)
+func GenTokenPair(userID int) (string, error) {
+	accessToken, err := JwtGenerate(userID)
 	if err != nil {
 		return "", err
 	}

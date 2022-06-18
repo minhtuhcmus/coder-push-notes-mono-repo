@@ -11,12 +11,15 @@ import (
 
 type Resolver struct {
 	authService *services.AuthService
+	noteService *services.NoteService
 }
 
 func New(
 	authService *services.AuthService,
+	noteService *services.NoteService,
 ) generated.Config {
 	return generated.Config{Resolvers: &Resolver{
 		authService: authService,
+		noteService: noteService,
 	}}
 }

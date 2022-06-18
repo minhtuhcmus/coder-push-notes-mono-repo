@@ -19,8 +19,10 @@ func InitHTTPServer(ctx context.Context) (http.Handler, error) {
 		middlewares.NewMiddleware,
 
 		services.NewAuthService,
+		services.NewNoteService,
 
 		repositories.NewUserRepository,
+		repositories.NewNoteRepository,
 	)
 	return nil, nil
 }
